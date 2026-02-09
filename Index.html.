@@ -6,57 +6,81 @@
     <title>Control Galpón - Editable</title>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        /* ESTILOS PARA QUE SE VEA BIEN EN TABLET */
-        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f9; }
-        h2 { text-align: center; color: #333; }
+        /* ESTILO CLÍNICO Y PROFESIONAL (AZUL/BLANCO) */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            background-color: #f0f2f5;
+        }
         
-        .table-container {
-            overflow-x: auto; /* Permite deslizar si la tabla es muy ancha */
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        h2 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
         }
 
-        table { width: 100%; border-collapse: collapse; min-width: 800px; }
-        th, td { padding: 12px; text-align: center; border-bottom: 1px solid #ddd; }
-        th { background-color: #007bff; color: white; }
+        .table-container {
+            overflow-x: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
 
-        /* ESTILOS DE LAS CAJAS PARA ESCRIBIR (INPUTS) */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+
+        /* Encabezado Azul */
+        thead {
+            background-color: #0056b3; 
+            color: white;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        /* Filas alternadas */
+        tbody tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        /* Inputs */
         input {
-            width: 90%;
+            width: 85%;
             padding: 8px;
             text-align: center;
             border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px; /* Letra grande para tocar fácil en tablet */
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        tfoot {
+            background-color: #343a40;
+            color: white;
+            font-weight: bold;
         }
         
-        /* COLORES AUTOMÁTICOS DE LAS FILAS */
-        .fila-roja { background-color: #ffcccc; }   /* Menor a 60% */
-        .fila-naranja { background-color: #ffe5b4; } /* Entre 60% y 75% */
-        .fila-verde { background-color: #d4edda; }   /* Mayor a 75% */
-
-        /* ESTILO DEL TOTAL FINAL */
-        tfoot { background-color: #333; color: white; font-weight: bold; }
-        tfoot td { font-size: 18px; }
-
-        /* BOTÓN DE GUARDAR */
+        /* Botón de guardar */
         .btn-guardar {
             display: block;
             width: 100%;
-            padding: 15px;
+            padding: 12px;
             background-color: #28a745;
             color: white;
-            font-size: 18px;
+            text-align: center;
             border: none;
-            border-radius: 8px;
+            border-radius: 6px;
+            font-size: 18px;
             margin-top: 20px;
             cursor: pointer;
         }
     </style>
-</head>
-<body>
 
     <h2>🐔 Control de Producción (Editable)</h2>
 
