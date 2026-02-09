@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control Galpón - Editable</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        /* ESTILOS PARA QUE SE VEA BIEN EN TABLET */
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f9; }
+        h2 { text-align: center; color: #333; }
+        
+        .table-container {
+            overflow-x: auto; /* Permite deslizar si la tabla es muy ancha */
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        th, td { padding: 12px; text-align: center; border-bottom: 1px solid #ddd; }
+        th { background-color: #007bff; color: white; }
+
+        /* ESTILOS DE LAS CAJAS PARA ESCRIBIR (INPUTS) */
+        input {
+            width: 90%;
+            padding: 8px;
+            text-align: center;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px; /* Letra grande para tocar fácil en tablet */
+        }
+        
+        /* COLORES AUTOMÁTICOS DE LAS FILAS */
+        .fila-roja { background-color: #ffcccc; }   /* Menor a 60% */
+        .fila-naranja { background-color: #ffe5b4; } /* Entre 60% y 75% */
+        .fila-verde { background-color: #d4edda; }   /* Mayor a 75% */
+
+        /* ESTILO DEL TOTAL FINAL */
+        tfoot { background-color: #333; color: white; font-weight: bold; }
+        tfoot td { font-size: 18px; }
+
+        /* BOTÓN DE GUARDAR */
+        .btn-guardar {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #28a745;
+            color: white;
+            font-size: 18px;
+            border: none;
+            border-radius: 8px;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>🐔 Control de Producción (Editable)</h2>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Lote / Fecha (Editar)</th>
+                    <th>Aves Ini. (Editar)</th>
+                    <th>Cartones</th>
+                    <th>Sueltos</th>
+                    <th>Total H.</th>
+                    <th>Muertas</th>
+                    <th>Vivas</th>
+                    <th>% Postura</th>
+                </tr>
+            </thead>
+            <tbody id="cuerpoTabla">
+                </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="4" style="text-align:right">TOTAL GALPÓN:</td>
+                    <td id="totalHuevos">0</td>
+                    <td id="totalMuertas">0</td>
+                    <td id="totalVivas">0</td>
+                    <td id="promedioPostura">0%</td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <button class="btn-guardar" onclick="guardarDatos()">💾 GUARDAR CAMBIOS</button>
+    </div>
+
+<script>
+    // DATOS INICIALES (Si es la primera vez que entras)
+    const datosPorDefecto = [
+        { nombre: "Lote 1 (Fecha)", aves: 464, cartones: 0, sueltos: 0, muertas: 0 },
+        { nombre: "Lote 2 (Fecha)", aves: 1475, cartones: 0, sueltos: 0, muertas: 0 },
+        { nombre: "Lote 3 (Fecha)", aves: 1042, cartones: 0, sueltos: 0, muertas: 0 },
+        { nombre: "Lote 4 (Fecha)", aves: 1470, cartones: 0, sueltos: 0, muertas: 0 },
+        { nombre: "Lote 5 (Fecha)", aves: 978, cartones: 0, sueltos: 0, muertas: 0 },
+        { nombre: "Lote 6 (Fecha)", aves: 1072, cartones: 0, sueltos: 0, muertas: 0 },
+        { nombre: "Lote 7 (Fecha)", aves: 574, cartones: 0, sueltos: 0, muertas: 0 },
+        { nombre: "Lote 8 (Fecha)", aves: 768, cartones: 0, sueltos: 0, muertas: 0 },
+        { nombre: "Lote 9 (Fecha)", aves: 1048, cartones: 0, sueltos: 0, muertas: 0 },
+        { nombre: "Lote 10 (Fecha)", aves: 1072, cartones: 0, sueltos: 0, muertas: 0 }
+    ];
+
+    let datos = [];
+
+    // AL CARGAR LA PÁGINA
+    document.addEventListener("DOMContentLoaded", () => {
+        // Intentar recuperar datos guardados anteriormente
+        const guardado = localStorage.getItem("datosGalpon");
+        if (guardado) {
+            datos = JSON.parse(guardado);
+        } else {
+            datos = JSON.parse(JSON.stringify(datosPorDefecto));
+        }
+        renderizarTabla();
+    });
+
+    // FUNCIÓN PARA DIBUJAR LA TABLA
+    function renderizarTabla() {
+        const tbody = document.getElementById("cuerpoTabla");
+        tbody.innerHTML = ""; // Limpiar tabla
+
+        let sumaHuevos = 0;
+        let sumaVivas = 0;
+        let sumaMuertas = 0;
+
+        datos.forEach((fila, index) => {
+            // Cálculos matemáticos
+            const totalHuevosFila = (fila.cartones * 24) + fila.sueltos;
+            const vivasFila = fila.aves - fila.muertas;
+            let porcentaje = 0;
+            if (vivasFila > 0) porcentaje = (totalHuevosFila / vivasFila) * 100;
+
+            // Acumular totales para el final
+            sumaHuevos += totalHuevosFila;
+            sumaVivas += vivasFila;
+            sumaMuertas += fila.muertas;
+
+            // Determinar color de la fila (SEMÁFORO)
+            let claseColor = "fila-verde"; // Por defecto verde (>75%)
+            if (porcentaje < 60) {
+                claseColor = "fila-roja";
+            } else if (porcentaje >= 60 && porcentaje <= 75) {
+                claseColor = "fila-naranja";
+            }
+
+            // Crear la fila HTML
+            const tr = document.createElement("tr");
+            tr.className = claseColor; // Asignar el color
+            
+            tr.innerHTML = `
+                <td><input type="text" value="${fila.nombre}" onchange="actualizarDato(${index}, 'nombre', this.value)"></td>
+                <td><input type="number" value="${fila.aves}" onchange="actualizarDato(${index}, 'aves', this.value)"></td>
+                <td><input type="number" value="${fila.cartones}" onchange="actualizarDato(${index}, 'cartones', this.value)"></td>
+                <td><input type="number" value="${fila.sueltos}" onchange="actualizarDato(${index}, 'sueltos', this.value)"></td>
+                <td style="font-weight:bold">${totalHuevosFila}</td>
+                <td><input type="number" value="${fila.muertas}" style="color:red" onchange="actualizarDato(${index}, 'muertas', this.value)"></td>
+                <td>${vivasFila}</td>
+                <td style="font-weight:bold">${porcentaje.toFixed(1)}%</td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        // Actualizar la fila TOTAL (Abajo)
+        document.getElementById("totalHuevos").innerText = sumaHuevos;
+        document.getElementById("totalMuertas").innerText = sumaMuertas;
+        document.getElementById("totalVivas").innerText = sumaVivas;
+        
+        // Calcular porcentaje global
+        let porcentajeGlobal = 0;
+        if (sumaVivas > 0) porcentajeGlobal = (sumaHuevos / sumaVivas) * 100;
+        
+        const celdaGlobal = document.getElementById("promedioPostura");
+        celdaGlobal.innerText = porcentajeGlobal.toFixed(1) + "%";
+        
+        // Color del porcentaje global
+        if (porcentajeGlobal < 60) celdaGlobal.style.color = "#ff9999"; // Rojo claro
+        else if (porcentajeGlobal <= 75)
